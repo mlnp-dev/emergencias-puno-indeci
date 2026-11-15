@@ -161,7 +161,7 @@ body > .selectize-dropdown { z-index: 2000; border: 1px solid #dfe4ee; border-ra
                background: linear-gradient(#2a78d6, #6250d6); margin-right: 9px; vertical-align: -2px; }
 .card-header.cab-flex::before { display: none; }
 .subtitulo { font-size: .78rem; color: #5b5f77; font-weight: 400; margin-left: 13px; display: block; }
-/* Caja de lectura sencilla bajo cada gráfico */
+/* Caja de interpretación bajo cada gráfico */
 .lectura { margin: 4px 14px 14px; padding: 11px 14px 11px 14px; border-radius: 12px; background: #f3f7fe;
            border-left: 4px solid #2a78d6; font-size: .82rem; line-height: 1.5; color: #2f3450; }
 .lectura .lt { display: flex; align-items: center; gap: 6px; font-size: .68rem; font-weight: 700; letter-spacing: .8px;
@@ -256,7 +256,7 @@ tema <- bs_theme(version = 5, primary = AZUL, secondary = VIOLETA, bg = "#ffffff
 # ---- Componentes ------------------------------------------------------------
 titulo_card <- function(titulo, subtitulo = NULL) card_header(titulo, if (!is.null(subtitulo)) span(class = "subtitulo", subtitulo))
 lectura <- function(id) uiOutput(id)
-caja <- function(txt, alerta = FALSE, tit = "En palabras sencillas") {
+caja <- function(txt, alerta = FALSE, tit = "Interpretación") {
   div(class = paste("lectura", if (alerta) "alerta"), div(class = "lt", icon(if (alerta) "triangle-exclamation" else "lightbulb"), tit), HTML(txt))
 }
 kpi <- function(titulo, icono, salida, n) {
@@ -300,7 +300,7 @@ filtros <- sidebar(
 pag_resumen <- nav_panel(
   "Resumen", icon = icon("chart-line"),
   intro("circle-info", "Qué muestra este tablero",
-        "Las emergencias que el INDECI registró en la región Puno desde 2003 se analizan en cuatro niveles. Cada pestaña responde una pregunta y cada gráfico trae debajo una explicación sencilla. Una emergencia se considera <b>de alto impacto</b> cuando afecta a 100 personas o más.",
+        "Las emergencias que el INDECI registró en la región Puno desde 2003 se analizan en cuatro niveles. Cada pestaña responde una pregunta y cada gráfico trae debajo su interpretación. Una emergencia se considera <b>de alto impacto</b> cuando afecta a 100 personas o más.",
         c("1. Qué pasó: Resumen y Mapa", "2. Por qué pasó: Diagnóstico", "3. Qué puede pasar: Modelo y Predicción", "4. Qué conviene hacer: Prescripción")),
   layout_columns(
     fill = FALSE, col_widths = c(3, 3, 3, 3),

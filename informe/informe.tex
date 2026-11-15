@@ -58,7 +58,7 @@
 \newcommand{\fig}[3]{% 1 archivo, 2 ancho, 3 pie y etiqueta
   \begin{figure}[H]\centering\includegraphics[width=#2\textwidth]{#1}#3\end{figure}}
 
-% Caja de interpretación en lenguaje sencillo
+% Caja de interpretación
 \newtcolorbox{lectura}{enhanced,breakable,colback=fondo,colframe=azul,boxrule=0pt,leftrule=3pt,arc=2pt,
   left=8pt,right=8pt,top=5pt,bottom=5pt,before skip=6pt,after skip=8pt,fontupper=\small\setlength{\parindent}{0pt},
   title={Interpretación del resultado},coltitle=azul,colbacktitle=fondo,fonttitle=\small\bfseries,
@@ -853,14 +853,14 @@ Datos & Todas & Tabla de emergencias filtradas con descarga en CSV \\
 \end{table}
 
 El tablero incorpora tres decisiones de diseño orientadas a que cualquier persona pueda interpretarlo. En primer
-lugar, cada gráfico incluye debajo una explicación en lenguaje sencillo, que se recalcula cuando cambian los
+lugar, cada gráfico incluye debajo un recuadro de interpretación, que se recalcula cuando cambian los
 filtros. En segundo lugar, los indicadores clave muestran, al pasar el cursor, qué significa la cifra y cómo debe
 leerse. En tercer lugar, la pestaña de prescripción permite mover la capacidad de evaluación y el stock de kits para
 observar cómo cambia la recomendación, lo que convierte el modelo de optimización en una herramienta de simulación
 para el decisor. Para ello, la solución de PuLP se precalculó para niveles de stock entre el 30 y el 120\,\% de la
 demanda, en pasos de cinco puntos. Las Figuras~\ref{fig:t1} a \ref{fig:t3} muestran tres de sus pestañas.
 
-\fig{t_resumen}{1}{\caption{Pestaña Resumen del tablero, con los indicadores clave y la explicación sencilla bajo
+\fig{t_resumen}{1}{\caption{Pestaña Resumen del tablero, con los indicadores clave y la interpretación bajo
 cada gráfico.}\label{fig:t1}}
 
 \fig{t_prediccion}{1}{\caption{Pestaña Predicción del tablero, con la matriz de riesgo por provincia y mes.}\label{fig:t2}}
