@@ -24,7 +24,7 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{xurl}
 
-\graphicspath{{../figuras/}{../capturas/informe/}}
+\graphicspath{{../figuras/}{../capturas/informe/}{../shiny/www/}}
 \hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue}
 
 \definecolor{marino}{RGB}{31,36,112}
@@ -71,19 +71,43 @@
 \begin{document}
 
 % =============================================================================
-\thispagestyle{plain}
-\begin{center}
-{\large\bfseries Emergencias por peligros naturales en la región Puno entre 2003 y 2026:\\
-analítica descriptiva, diagnóstica, predictiva y prescriptiva con datos del SINPAD\par}
-\vspace{10pt}
-{Mary Luz Nina Palacios\par}
-{\small Universidad Nacional del Altiplano, Escuela de Posgrado. Maestría en Informática, curso Business
-Intelligence and Data Analytics. Docente: Dr. Fred Torres Cruz\par}
-{\small Actividad Semana 4: Analítica, modelos y optimización. Puno, noviembre de 2026\par}
-\end{center}
+% Portada
+\begin{titlepage}
+\begin{singlespace}
+\centering
+{\Large\bfseries\color{marino} UNIVERSIDAD NACIONAL DEL ALTIPLANO\par}
 \vspace{4pt}
+{\large\bfseries\color{marino} ESCUELA DE POSGRADO\par}
+\vspace{2pt}
+{\normalsize\bfseries MAESTRÍA EN INFORMÁTICA\par}
+\vspace{22pt}
+\includegraphics[height=3.6cm]{logo_epg.png}\par
+\vspace{22pt}
+{\color{marino}\rule{\textwidth}{1.2pt}\par}
+\vspace{12pt}
+{\LARGE\bfseries Emergencias por peligros naturales\\[2pt] en la región Puno entre 2003 y 2026\par}
+\vspace{10pt}
+{\large Analítica descriptiva, diagnóstica, predictiva y prescriptiva\\ con datos del SINPAD del INDECI\par}
+\vspace{12pt}
+{\color{marino}\rule{\textwidth}{1.2pt}\par}
+\vspace{20pt}
+{\large\bfseries Actividad Semana 4: Analítica, modelos y optimización\par}
+\vspace{26pt}
+\begin{tabular}{@{}r@{\hspace{10pt}}l@{}}
+\textbf{Curso:} & Business Intelligence and Data Analytics \\[4pt]
+\textbf{Docente:} & Dr. Fred Torres Cruz \\[4pt]
+\textbf{Estudiante:} & Mary Luz Nina Palacios \\
+\end{tabular}\par
+\vfill
+\includegraphics[height=1.5cm]{logo_facultad.png}\par
+\vspace{14pt}
+{\large\bfseries Puno, Perú\\ Noviembre de 2026\par}
+\end{singlespace}
+\end{titlepage}
 
 % =============================================================================
+\setcounter{page}{2}
+\begin{spacing}{1.15}
 \section*{Resumen}
 \noindent Este informe documenta el proceso completo de analítica e inteligencia de negocios aplicado a las 6\,593
 emergencias que el Sistema de Información Nacional para la Respuesta y Rehabilitación del Instituto Nacional de
@@ -108,8 +132,8 @@ proceso completo es reproducible desde un repositorio público.
 Random Forest, optimización de hiperparámetros, Optuna, programación lineal, tablero interactivo.
 
 \begin{sintesis}{Síntesis para la toma de decisiones}
-\small
-\begin{itemize}[leftmargin=14pt]
+\small\setstretch{1.1}
+\begin{itemize}[leftmargin=14pt,itemsep=1pt,topsep=2pt]
 \item \textbf{El problema central de Puno son las heladas.} Ocurren menos que otros peligros, pero dejan casi
 ocho de cada diez personas impactadas y tres de cada cuatro alpacas y llamas perdidas.
 \item \textbf{El riesgo tiene calendario.} Las lluvias golpean entre diciembre y marzo, y las heladas entre mayo y
@@ -122,9 +146,11 @@ de los casos graves con el mismo personal, y ubicar al menos el 75\,\% de los ki
 de cada temporada.
 \end{itemize}
 \textbf{Tablero interactivo:} \url{https://mlnp.shinyapps.io/emergencias-puno/}\\
-\textbf{Repositorio con datos, código y resultados:} \url{https://github.com/mlnp-dev/emergencias-puno-indeci}
+\textbf{Repositorio con datos y código:} \url{https://github.com/mlnp-dev/emergencias-puno-indeci}
 \end{sintesis}
+\end{spacing}
 
+\clearpage
 % =============================================================================
 \section{Introducción}
 
