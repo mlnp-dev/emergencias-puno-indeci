@@ -1,0 +1,1081 @@
+% Actividad Semana 4: proceso de analítica y BI con datos del SINPAD del INDECI, región Puno
+% Compilar:  tectonic -X compile informe.tex
+\documentclass[12pt,a4paper]{article}
+\usepackage[spanish,es-noshorthands,es-tabla,es-nodecimaldot]{babel}
+\usepackage{fontspec}
+\setmainfont{texgyretermes}[Extension=.otf,UprightFont=*-regular,BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic]
+\setsansfont{texgyreheros}[Extension=.otf,UprightFont=*-regular,BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic]
+\setmonofont{texgyrecursor}[Extension=.otf,UprightFont=*-regular,BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic,Scale=0.95]
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{booktabs,tabularx,array,multirow}
+\usepackage[table]{xcolor}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage[round,authoryear]{natbib}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+
+\graphicspath{{../figuras/}{../capturas/informe/}}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue}
+
+\definecolor{marino}{RGB}{31,36,112}
+\definecolor{azul}{RGB}{42,120,214}
+\definecolor{fondo}{RGB}{243,247,254}
+\definecolor{naranja}{RGB}{235,104,52}
+\definecolor{fondonar}{RGB}{255,246,240}
+
+\onehalfspacing
+\setlength{\emergencystretch}{3em}
+\setlength{\parindent}{1.27cm}
+\setlength{\parskip}{2pt}
+\captionsetup{font=small,labelfont=bf,justification=justified,singlelinecheck=true}
+\captionsetup[figure]{name=Figura}
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{14pt}{6pt}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
+\setlist{itemsep=2pt,topsep=4pt}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Actividad Semana 4: proceso de analítica y BI}
+\fancyhead[R]{\small Emergencias en la región Puno}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newcommand{\fig}[3]{% 1 archivo, 2 ancho, 3 pie y etiqueta
+  \begin{figure}[H]\centering\includegraphics[width=#2\textwidth]{#1}#3\end{figure}}
+
+% Caja de interpretación en lenguaje sencillo
+\newtcolorbox{lectura}{enhanced,breakable,colback=fondo,colframe=azul,boxrule=0pt,leftrule=3pt,arc=2pt,
+  left=8pt,right=8pt,top=5pt,bottom=5pt,before skip=6pt,after skip=8pt,fontupper=\small\setlength{\parindent}{0pt},
+  title={Interpretación del resultado},coltitle=azul,colbacktitle=fondo,fonttitle=\small\bfseries,
+  attach title to upper={\par\smallskip}}
+\newtcolorbox{sintesis}[1]{enhanced,breakable,colback=white,colframe=marino,boxrule=0.8pt,arc=3pt,
+  left=10pt,right=10pt,top=6pt,bottom=6pt,colbacktitle=marino,coltitle=white,fonttitle=\bfseries,title={#1}}
+\newtcolorbox{alerta}{enhanced,breakable,colback=fondonar,colframe=naranja,boxrule=0pt,leftrule=3pt,arc=2pt,
+  left=8pt,right=8pt,top=5pt,bottom=5pt,before skip=6pt,after skip=8pt,fontupper=\small\setlength{\parindent}{0pt}}
+
+\begin{document}
+
+% =============================================================================
+\thispagestyle{plain}
+\begin{center}
+{\large\bfseries Emergencias por peligros naturales en la región Puno entre 2003 y 2026:\\
+analítica descriptiva, diagnóstica, predictiva y prescriptiva con datos del SINPAD\par}
+\vspace{10pt}
+{Mary Luz Nina Palacios\par}
+{\small Universidad Nacional del Altiplano, Escuela de Posgrado. Maestría en Informática, curso Business
+Intelligence and Data Analytics. Docente: Dr. Fred Torres Cruz\par}
+{\small Actividad Semana 4: Analítica, modelos y optimización. Puno, noviembre de 2026\par}
+\end{center}
+\vspace{4pt}
+
+% =============================================================================
+\section*{Resumen}
+\noindent Este informe documenta el proceso completo de analítica e inteligencia de negocios aplicado a las 6\,593
+emergencias que el Sistema de Información Nacional para la Respuesta y Rehabilitación del Instituto Nacional de
+Defensa Civil registró en la región Puno entre enero de 2003 y junio de 2026. La revisión de calidad detectó
+subregistro en 2014 y 2019, la pérdida progresiva del registro de la ayuda humanitaria y un error de origen en la
+columna de viviendas destruidas del archivo de 2026. El análisis exploratorio muestra que las heladas representan
+el 29\,\% de las emergencias, pero concentran el 77\,\% de las personas impactadas y el 76\,\% de los camélidos
+perdidos, y que el riesgo se reparte en dos temporadas: lluvias, de diciembre a marzo, y heladas, de mayo a agosto.
+Se planteó predecir, con la información disponible al momento del reporte, si una emergencia afectará a 100 o más
+personas. De ocho modelos comparados con validación cruzada temporal, Random Forest obtuvo el mejor desempeño,
+con un ROC AUC de 0,882. Sus hiperparámetros se optimizaron con Optuna, scikit-optimize, Hyperopt y búsqueda
+aleatoria bajo el mismo presupuesto; todas las estrategias alcanzaron valores entre 0,890 y 0,891, y Optuna fue la
+más rápida gracias a la poda. En el periodo de prueba, de 2022 a 2026, el modelo optimizado alcanzó un ROC AUC de
+0,821, frente a 0,800 con los valores por defecto. Con el modelo se construyó una matriz de riesgo que anticipa
+unas 76 emergencias graves por año, encabezadas por Melgar, Azángaro y Puno. La analítica prescriptiva propone
+priorizar las evaluaciones de daños según el riesgo estimado, lo que permite atender el 54\,\% de los casos graves
+evaluando solo el 20\,\% de los reportes, y un modelo de programación lineal que distribuye los kits de ayuda entre
+provincias antes de cada temporada. Los resultados se integran en un tablero interactivo publicado en línea y el
+proceso completo es reproducible desde un repositorio público.
+
+\medskip\noindent\textbf{Palabras clave:} inteligencia de negocios, gestión del riesgo de desastres, SINPAD,
+Random Forest, optimización de hiperparámetros, Optuna, programación lineal, tablero interactivo.
+
+\begin{sintesis}{Síntesis para la toma de decisiones}
+\small
+\begin{itemize}[leftmargin=14pt]
+\item \textbf{El problema central de Puno son las heladas.} Ocurren menos que otros peligros, pero dejan casi
+ocho de cada diez personas impactadas y tres de cada cuatro alpacas y llamas perdidas.
+\item \textbf{El riesgo tiene calendario.} Las lluvias golpean entre diciembre y marzo, y las heladas entre mayo y
+agosto. Abril y noviembre son las ventanas para prepararse.
+\item \textbf{La gravedad se puede anticipar.} Con solo saber qué peligro ocurrió, dónde y cuándo, y cómo le fue antes a
+ese lugar, un modelo distingue los casos graves de los leves en ocho de cada diez comparaciones.
+\item \textbf{Se esperan unas 76 emergencias graves por año.} Melgar, Azángaro y Puno concentran el mayor riesgo.
+\item \textbf{Dos decisiones concretas.} Evaluar primero los reportes de mayor riesgo, lo que duplica la cobertura
+de los casos graves con el mismo personal, y ubicar al menos el 75\,\% de los kits de ayuda en las provincias antes
+de cada temporada.
+\end{itemize}
+\textbf{Tablero interactivo:} \url{https://mlnp.shinyapps.io/emergencias-puno/}\\
+\textbf{Repositorio con datos, código y resultados:} \url{https://github.com/mlnp-dev/emergencias-puno-indeci}
+\end{sintesis}
+
+% =============================================================================
+\section{Introducción}
+
+Puno es una de las regiones del Perú que más emergencias registra cada año. En el altiplano, por encima de los
+3\,800 metros, las heladas y las nevadas de junio y julio enferman a la población, causan la muerte de alpacas y
+llamas y deterioran los pastos; entre diciembre y marzo, las lluvias intensas desbordan ríos, inundan viviendas y
+activan huaicos en la selva alta de Sandia y Carabaya. Cada uno de estos eventos queda registrado en el Sistema de
+Información Nacional para la Respuesta y Rehabilitación, conocido como SINPAD, que administra el Instituto Nacional
+de Defensa Civil, junto con la Evaluación de Daños y Análisis de Necesidades que elaboran los gobiernos locales.
+
+Ese registro constituye una fuente valiosa para la inteligencia de negocios en el sector público. No basta con
+contar cuántas emergencias ocurrieron: interesa saber dónde y cuándo se concentran, qué hace que una emergencia
+termine afectando a cientos de personas y, sobre todo, cómo usar esa información para decidir antes de la
+siguiente temporada. Esta progresión corresponde a los cuatro niveles de la analítica de negocios, descriptivo,
+diagnóstico, predictivo y prescriptivo, que proponen \citet{delen2018} y que \citet{lepenioti2020} desarrollan
+para el nivel prescriptivo.
+
+La pregunta de negocio que guía el trabajo es la siguiente: \textbf{¿se puede estimar, en el momento en que un
+distrito reporta una emergencia, la probabilidad de que llegue a afectar a 100 o más personas, y cómo debe usarse
+esa estimación para asignar los equipos de evaluación y la ayuda humanitaria?}
+
+\noindent\textbf{Objetivo general.} Desarrollar un proceso integral de analítica e inteligencia de negocios sobre
+las emergencias registradas en la región Puno que transforme el registro histórico del SINPAD en información útil
+para la gestión del riesgo de desastres.
+
+\noindent\textbf{Objetivos específicos.}
+\begin{enumerate}[leftmargin=22pt]
+\item Seleccionar, depurar y documentar un conjunto de datos local y abierto, evaluando la calidad de su registro.
+\item Describir el comportamiento de las emergencias según el peligro, el territorio y el calendario.
+\item Comparar modelos de clasificación que anticipen el alto impacto de una emergencia con validación temporal.
+\item Optimizar los hiperparámetros del mejor modelo con las herramientas revisadas en clase y comparar su eficiencia.
+\item Comunicar los resultados mediante las analíticas descriptiva, diagnóstica, predictiva y prescriptiva, y
+mediante un tablero interactivo de acceso público.
+\end{enumerate}
+
+El informe se ordena en función de esos objetivos. La sección 2 resume el marco de referencia y la sección 3
+describe la metodología. Las secciones 4 a 8 desarrollan los cinco pasos del encargo: selección del conjunto de
+datos, análisis exploratorio, selección de modelos, optimización y \emph{reporting}. La sección 9 presenta el
+tablero interactivo, y las secciones finales discuten los resultados, sus limitaciones y las recomendaciones.
+
+% =============================================================================
+\section{Marco de referencia}
+
+La analítica de negocios se entiende como una progresión de preguntas. La analítica descriptiva responde qué
+pasó; la diagnóstica, por qué pasó; la predictiva, qué puede pasar, y la prescriptiva, qué conviene hacer
+\citep{delen2018}. Este último nivel es el que más valor aporta a la decisión, porque combina las predicciones con
+modelos de optimización o reglas de decisión que recomiendan acciones concretas \citep{lepenioti2020}.
+
+En la gestión de desastres, el aprendizaje automático se ha aplicado a la alerta temprana, la estimación de daños
+y la asignación de recursos. Las revisiones de \citet{sun2020}, \citet{linardos2022} y \citet{kyrkou2023}
+coinciden en que los modelos de clasificación basados en árboles ofrecen un buen equilibrio entre precisión e
+interpretabilidad, y en que la principal dificultad no es el algoritmo sino la calidad y la disponibilidad de los
+registros históricos. \citet{ghaffarian2023} añaden que, para que estos modelos se usen en la gestión pública, sus
+resultados deben poder explicarse a quienes toman las decisiones, lo que justifica el énfasis de este trabajo en
+la interpretación de cada resultado.
+
+La optimización de hiperparámetros busca la configuración de un modelo que maximiza su desempeño fuera de la
+muestra. \citet{bischl2023} distinguen entre la búsqueda aleatoria, que sirve como referencia, y los métodos
+basados en modelos sustitutos, como la optimización bayesiana con procesos gaussianos \citep{shahriari2016} y el
+estimador de Parzen estructurado en árbol \citep{bergstra2015}, que aprenden de las evaluaciones anteriores para
+proponer las siguientes. Optuna \citep{akiba2019} incorpora además la poda, que abandona las configuraciones poco
+prometedoras antes de terminar de evaluarlas.
+
+Por último, ubicar la ayuda humanitaria antes de que ocurra el desastre es un problema clásico de la logística
+humanitaria. Los modelos de pre posicionamiento deciden cuánto almacenar y dónde, equilibrando la cobertura de la
+demanda incierta con los costos de transporte \citep{balcik2008,rawls2010}. La revisión de \citet{sabbaghtorkan2020}
+muestra que la programación lineal es la herramienta más utilizada para este fin y que una de las brechas
+pendientes es alimentar estos modelos con estimaciones de demanda basadas en datos, que es precisamente lo que
+aporta la parte predictiva de este trabajo.
+
+% =============================================================================
+\section{Metodología}
+
+El trabajo siguió un proceso de inteligencia de negocios de seis etapas, desde la fuente de datos hasta el
+tablero de decisión, como resume la Figura~\ref{fig:proceso}. Cada etapa produce un insumo para la siguiente y todas
+quedaron programadas, de modo que cualquier cifra del informe puede reproducirse a partir de los archivos
+originales.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=4mm and 2.6mm,
+  caja/.style={draw=marino,fill=fondo,rounded corners=3pt,align=center,font=\scriptsize,minimum height=16mm,text width=21.5mm,line width=0.6pt},
+  flecha/.style={-{Stealth[length=2mm]},color=marino,line width=0.8pt}]
+\node[caja] (a) {\textbf{1. Fuente}\\SINPAD del INDECI, datos abiertos};
+\node[caja,right=of a] (b) {\textbf{2. Preparación}\\Limpieza, calidad y variables};
+\node[caja,right=of b] (c) {\textbf{3. Exploración}\\Descriptiva y diagnóstica};
+\node[caja,right=of c] (d) {\textbf{4. Modelado}\\Ocho modelos, validación temporal};
+\node[caja,right=of d] (e) {\mbox{\textbf{5. Optimización}}\\Optuna, skopt, Hyperopt y PuLP};
+\node[caja,right=of e,fill=marino,text=white] (f) {\textbf{6. Reporting}\\Informe y tablero en Shiny};
+\foreach \x/\y in {a/b,b/c,c/d,d/e,e/f} \draw[flecha] (\x) -- (\y);
+\end{tikzpicture}
+\caption{Proceso de analítica e inteligencia de negocios seguido en el trabajo.}\label{fig:proceso}
+\end{figure}
+
+La Tabla~\ref{tab:herramientas} detalla las herramientas utilizadas en cada etapa. El análisis se programó en
+Python dentro de un cuaderno Jupyter y el tablero se desarrolló en R con Shiny, de forma que la parte analítica y la
+parte de comunicación quedan separadas pero comparten los mismos resultados exportados.
+
+\begin{table}[H]\centering\small
+\caption{Herramientas utilizadas en cada etapa del proceso}\label{tab:herramientas}
+\begin{tabularx}{\textwidth}{L{3.1cm}Y}
+\toprule
+Etapa & Herramientas \\
+\midrule
+Preparación y exploración & Python 3, pandas, NumPy, SciPy, Matplotlib y Seaborn \\
+Modelado & scikit-learn \citep{pedregosa2011}, XGBoost \citep{chen2016} y LightGBM \citep{ke2017} \\
+Optimización de hiperparámetros & Optuna \citep{akiba2019}, scikit-optimize y Hyperopt \citep{bergstra2015} \\
+Optimización de decisiones & PuLP con el resolvedor CBC para programación lineal \\
+Reporting & \LaTeX\ para el informe; R, Shiny, plotly y leaflet para el tablero, publicado en shinyapps.io \\
+Reproducibilidad & Jupyter Notebook y repositorio público en GitHub \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% =============================================================================
+\section{Paso 1: selección del conjunto de datos}\label{sec:datos}
+
+\subsection{Fuente y justificación}
+
+Se utilizó el conjunto \emph{Emergencias y daños a nivel nacional por departamento}, publicado por el INDECI en la
+Plataforma Nacional de Datos Abiertos con licencia ODC BY \citep{indeci2026}. Está formado por dos tablas, la serie
+histórica de 2003 a 2025, con 142\,139 registros, y el primer semestre de 2026, con 9\,352 registros, acompañadas
+de un diccionario de datos y un documento de metadatos. Cada fila corresponde a una emergencia ocurrida en un
+distrito y contiene 49 columnas: código SINPAD, fecha, ubicación, peligro y tipo de peligro, daños en personas,
+viviendas, locales educativos y de salud, vías, canales de riego, cultivos y ganado, así como el peso y el costo de
+la ayuda humanitaria entregada.
+
+Puno ocupa el séptimo lugar nacional por número de emergencias registradas, con el 4,4\,\% del total, después de
+Apurímac, Huancavelica, Cusco, Ayacucho, Cajamarca y Huánuco. Sus 6\,593 registros, distribuidos en 13 provincias y
+109 distritos, ofrecen volumen suficiente para modelar. El tema cumple, además, la condición de ser un conjunto de
+datos único dentro del aula, ya que las otras fuentes anunciadas corresponden a la producción de quinua, los
+visitantes a sitios turísticos, la producción de trucha y las ventas de una distribuidora de bebidas.
+
+\subsection{Preparación}
+
+La preparación resolvió cinco problemas detectados al leer los archivos:
+
+\begin{enumerate}
+\item \textbf{Nombres de columnas distintos.} El archivo de 2026 renombra varias columnas, aunque conserva su orden.
+Se asignaron nombres cortos comunes a las 49 columnas.
+\item \textbf{Dos formatos de fecha.} La serie histórica usa día, mes y año con cuatro dígitos, mientras que la de 2026
+usa mes, día y año con dos dígitos. Cada fecha se interpretó según su longitud y se contrastó con las columnas de
+año y mes, sin encontrar fechas inválidas ni discrepancias.
+\item \textbf{Tildes y catálogo de peligros cambiante.} En 2026 aparecen Azángaro, San Román y Huancané con tilde, que
+sin corregir se contarían como provincias nuevas, y el catálogo de peligros cambia de nombres entre años. Se
+normalizaron las tildes y los 34 nombres de peligro se agruparon en diez familias: heladas y bajas temperaturas,
+que incluye las nevadas; lluvias, granizo y tormentas; inundaciones; vientos fuertes; incendios urbanos; incendios
+forestales; sequía; movimientos en masa; sismos y vulcanismo; y otros.
+\item \textbf{Error en las viviendas destruidas de 2026.} En el 78\,\% de las filas de Puno de 2026 con viviendas
+destruidas, el valor coincide con el número de personas afectadas, y el mismo patrón aparece en el 57\,\% de las
+filas a nivel nacional. Ello arrojaba 44\,930 viviendas destruidas en un semestre, frente a 17\,382 en los 23 años
+anteriores. Al tratarse de un error de origen, esa columna se anuló para 2026.
+\item \textbf{Variables derivadas.} Se definieron las \emph{personas impactadas} como la suma de fallecidos,
+desaparecidos, lesionados, damnificados y afectados, y la \emph{emergencia de alto impacto} como aquella con 100 o
+más personas impactadas. Con ese umbral, 1\,876 emergencias, el 28,5\,\% del total, son de alto impacto.
+\end{enumerate}
+
+\begin{lectura}
+Antes de analizar fue necesario poner en orden los datos, porque el INDECI cambió con los años la forma de anotar
+fechas, nombres y peligros. Sin esa corrección, una misma provincia habría aparecido dos veces y el primer semestre
+de 2026 habría mostrado más viviendas destruidas que los 23 años anteriores juntos, lo que es imposible. La base
+final tiene 6\,593 emergencias, y casi tres de cada diez afectaron a 100 personas o más.
+\end{lectura}
+
+% =============================================================================
+\section{Paso 2: análisis exploratorio de datos}\label{sec:eda}
+
+\subsection{Calidad del registro}
+
+La Figura~\ref{fig:anio} muestra dos problemas que condicionan todo el análisis. El primero es el subregistro de
+algunos años: 2019 tiene solo 43 emergencias y 2014 solo 83, frente a un promedio de 248 por año entre 2003 y 2021.
+No fueron años sin heladas ni lluvias, sino años en que el sistema registró poco. El segundo es que el registro de
+la ayuda humanitaria se fue perdiendo. Entre 2003 y 2011 más del 90\,\% de las emergencias tenía la ayuda anotada;
+desde 2015 la proporción baja del 40\,\% y en 2019 y entre 2024 y 2026 es nula. Por ello, la ayuda entregada no se
+usó como variable objetivo. Además, entre 2014 y 2019 creció la proporción de emergencias registradas sin ninguna
+persona impactada, hasta llegar al 57\,\% en 2017. Desde 2022 el registro vuelve a crecer, con un promedio de 403
+emergencias por año entre 2022 y 2025.
+
+\fig{fig01_eventos_por_anio}{0.95}{\caption{Emergencias registradas por año en Puno y proporción con ayuda
+humanitaria registrada. El año 2026 corresponde solo al primer semestre.}\label{fig:anio}}
+
+\begin{alerta}
+\textbf{Advertencia sobre los datos.} Un año con pocas emergencias en la base no fue necesariamente un año tranquilo.
+En 2014 y 2019 se registró mucho menos de lo que ocurrió, y desde 2015 casi no se anota la ayuda entregada. Por eso
+estas cifras no deben leerse como si la ayuda hubiera desaparecido, sino como un problema del llenado del sistema.
+\end{alerta}
+
+\subsection{Distribución del impacto}
+
+El impacto es muy asimétrico, como se aprecia en la Figura~\ref{fig:dist}. El 22,5\,\% de las emergencias no tiene
+ninguna persona impactada, la mediana es de 9 personas y el percentil 90 supera las 1\,100. Unas pocas emergencias
+alcanzan decenas de miles de personas; las dos mayores de la serie ocurrieron en Ilave, provincia de El Collao, en
+enero de 2016, una por sequía, con 54\,590 personas, y otra por bajas temperaturas, con 50\,305. La suma de todas
+las emergencias asciende a 2,76 millones de personas impactadas, pero esa cifra debe leerse como personas por
+evento: una familia afectada por las heladas en varias temporadas se cuenta varias veces, por lo que no es
+comparable con la población de la región, de alrededor de 1,2 millones.
+
+\fig{fig02_distribucion_personas}{0.72}{\caption{Distribución de las personas impactadas por emergencia en escala
+logarítmica y umbral de alto impacto.}\label{fig:dist}}
+
+\begin{lectura}
+La mayoría de emergencias son pequeñas: la mitad afecta a 9 personas o menos. Sin embargo, unas pocas afectan a miles
+y son las que concentran casi todo el daño. Por eso conviene identificar a tiempo cuáles serán graves, que es el
+objetivo del modelo desarrollado en el paso 3.
+\end{lectura}
+
+\subsection{Frecuencia frente a impacto según el peligro}
+
+Lo más frecuente no es lo que más daño causa, como muestra la Figura~\ref{fig:peligro}. Las heladas y bajas
+temperaturas representan el 29\,\% de las emergencias, pero reúnen el 77\,\% de las personas impactadas y el 76\,\%
+de los camélidos perdidos, y el 66\,\% de ellas supera las 100 personas. Los incendios urbanos son el segundo
+peligro más frecuente, con 1\,170 casos, pero casi nunca alcanzan el alto impacto, apenas en el 2\,\% de los casos.
+Las inundaciones y la sequía ocurren con menor frecuencia, aunque un tercio de sus emergencias son de alto impacto;
+la sequía casi no deja damnificados, pero explica el 20\,\% de los camélidos perdidos y buena parte de los cultivos
+dañados.
+
+\fig{fig03_frecuencia_vs_impacto}{1}{\caption{Número de emergencias y personas impactadas por familia de
+peligro en Puno entre 2003 y 2026.}\label{fig:peligro}}
+
+\begin{lectura}
+Si solo se contara cuántas emergencias hay, se pensaría que los incendios urbanos son un problema tan grande como las
+heladas. Al medir a cuántas personas afectan, la conclusión cambia por completo: las heladas causan casi ocho de cada
+diez personas impactadas. La prioridad de la gestión del riesgo en Puno debe ser, por tanto, la temporada de frío.
+\end{lectura}
+
+\subsection{Estacionalidad}
+
+La región presenta dos temporadas de emergencias muy marcadas, que se observan en la Figura~\ref{fig:mes}. Entre
+diciembre y marzo ocurre el 78\,\% de las emergencias por lluvias, granizo y tormentas y el 89\,\% de las
+inundaciones; febrero es el mes con más emergencias del año. Entre mayo y agosto ocurre el 64\,\% de las
+emergencias por bajas temperaturas, y solo junio y julio reúnen el 46\,\%. Al final de la época seca, de agosto a
+octubre, se concentra el 71\,\% de los incendios forestales, junto con los vientos fuertes. Abril, mayo y diciembre
+son los meses más tranquilos y marcan las ventanas para preparar la respuesta.
+
+\fig{fig05_estacionalidad}{1}{\caption{Emergencias por mes y familia de peligro.}\label{fig:mes}}
+
+\subsection{Distribución territorial}
+
+Las heladas dominan en casi todas las provincias altiplánicas, como se observa en la Figura~\ref{fig:prov}. Sandia,
+la provincia de selva alta, presenta otro perfil, ya que el 56\,\% de sus emergencias corresponde a lluvias intensas
+y movimientos en masa. Moho y Chucuito tienen una proporción alta de incendios urbanos, mientras que en El Collao y
+Yunguyo destacan los vientos fuertes. Por personas impactadas acumuladas sobresalen Azángaro, Puno y El Collao.
+Ilave es el distrito más afectado, con unas 184 mil personas por evento en 241 emergencias, y los 15 distritos con
+más personas impactadas reúnen el 34\,\% del total, según la Figura~\ref{fig:dist15}.
+
+\fig{fig06_provincia_peligro}{1}{\caption{Perfil de peligros por provincia. El número indica las emergencias y el
+color, su participación dentro de la provincia.}\label{fig:prov}}
+
+\fig{fig07_top_distritos}{0.85}{\caption{Los 15 distritos con más personas impactadas, acumulado de 2003 a 2026.}\label{fig:dist15}}
+
+\begin{lectura}
+El riesgo no es igual en toda la región. En el altiplano el enemigo es el frío, mientras que en la selva alta de
+Sandia lo son las lluvias y los deslizamientos. Además, el daño se concentra en pocos lugares: quince distritos
+acumulan un tercio de todas las personas impactadas. Esto permite focalizar la prevención en lugar de repartir los
+recursos por igual.
+\end{lectura}
+
+\subsection{Tendencias y daños productivos}
+
+Las pérdidas de camélidos se concentran en pocos años: 2010, con unos 300 mil animales, y 2015, con 112 mil,
+registradas como bajas temperaturas, y 2023, con 100 mil, registradas como sequía, como muestra la
+Figura~\ref{fig:tend}. El año 2023 es también el de mayor superficie de cultivo dañada, con unas 272 mil hectáreas,
+el 93\,\% por sequía. Las correlaciones de Spearman muestran que damnificados y afectados miden aspectos distintos:
+los damnificados se asocian con las viviendas destruidas, con $\rho=0{,}79$, y los afectados con el total de
+personas, con $\rho=0{,}84$. La ayuda entregada apenas se relaciona con los daños, con $\rho=0{,}36$ respecto de
+las personas impactadas, lo que constituye otra señal de su registro irregular.
+
+\fig{fig08_tendencias_y_danos}{1}{\caption{Emergencias por año de los cuatro peligros más frecuentes, a la izquierda,
+y pérdidas de camélidos y cultivos, a la derecha.}\label{fig:tend}}
+
+% =============================================================================
+\section{Paso 3: selección de modelos}\label{sec:modelos}
+
+\subsection{Planteamiento}
+
+Cuando un distrito reporta una emergencia, todavía no se conoce cuántas personas resultarán afectadas; ese dato se
+obtiene días después, con la evaluación de daños. El problema se formuló, por tanto, como una clasificación binaria:
+estimar, en el primer momento, la probabilidad de que la emergencia sea de alto impacto, es decir, que afecte a 100
+o más personas, para decidir a dónde enviar primero a los evaluadores y los bienes de ayuda.
+
+Para que el modelo resulte útil en la práctica, solo se usaron variables conocidas al momento del reporte. Los daños
+quedaron fuera porque son justamente lo que se quiere anticipar, y usarlos constituiría una fuga de información
+\citep{kaufman2012}. Las variables se presentan en la Tabla~\ref{tab:variables}. Las de historia del lugar se
+calcularon únicamente con emergencias de fechas anteriores, y las tasas se suavizaron hacia la tasa general para que
+un distrito con una sola emergencia previa no reciba un valor extremo de 0 o 100\,\%.
+
+\begin{table}[H]\centering\small
+\caption{Variables predictoras, todas disponibles al momento del reporte}\label{tab:variables}
+\begin{tabularx}{\textwidth}{L{3.2cm}Y}
+\toprule
+Grupo & Variables \\
+\midrule
+Qué pasó & Familia de peligro; tipo de peligro, natural o inducido por la acción humana \\
+Dónde & Provincia; región natural, sierra o selva alta \\
+Cuándo & Mes, codificado con seno y coseno para respetar su carácter cíclico; año \\
+Historia del distrito & Emergencias previas; tasa previa de alto impacto; promedio previo de personas
+impactadas en logaritmo; días desde la última emergencia \\
+Historia de la provincia & Emergencias previas y tasa previa de alto impacto del mismo peligro en la provincia;
+emergencias en la provincia en los 30 días anteriores \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+La partición respetó el orden temporal. El entrenamiento usó las emergencias de 2003 a 2021, que suman 4\,715 con un
+31,2\,\% de alto impacto, y la prueba las de 2022 a 2026, que suman 1\,878 con un 21,6\,\% de alto impacto y que el
+modelo no vio en ningún momento. Dentro del entrenamiento, la validación cruzada usó cinco bloques consecutivos:
+cada bloque se entrena con el pasado y se valida con el periodo siguiente. Mezclar al azar emergencias de distintos
+años produciría una estimación demasiado optimista \citep{bergmeir2012,cerqueira2020}.
+
+\subsection{Modelos comparados y métricas}
+
+Se compararon ocho clasificadores: una línea base que predice al azar con la proporción de clases, regresión
+logística, árbol de decisión, $k$ vecinos más cercanos, Random Forest \citep{breiman2001}, HistGradientBoosting,
+XGBoost y LightGBM. Las variables categóricas se transformaron en indicadores binarios y, para la regresión
+logística y los $k$ vecinos, las numéricas se estandarizaron. En los modelos que lo permiten se compensó el
+desbalance de clases. La métrica principal fue el ROC AUC, que mide la capacidad del modelo para ordenar las
+emergencias según su riesgo sin depender de un umbral. Se reportan también el PR AUC, más informativo cuando las
+clases están desbalanceadas \citep{saito2015}, la F1, la exactitud balanceada y el puntaje de Brier, que mide la
+calibración de las probabilidades. El significado de cada métrica se explica en el glosario del Anexo A.
+
+\subsection{Resultados}
+
+La Tabla~\ref{tab:seleccion} y la Figura~\ref{fig:seleccion} resumen la comparación. Todos los modelos superan con
+amplitud a la línea base, lo que confirma que la información disponible al momento del reporte permite anticipar el
+impacto. Random Forest obtuvo el mejor ROC AUC, 0,882, la mejor F1 y la mejor calibración. Las diferencias entre
+los seis primeros modelos son pequeñas frente a la variación entre bloques, cuya desviación ronda 0,04, de modo
+que el periodo de validación influye más que el algoritmo. El árbol de decisión simple fue claramente inferior y el
+más inestable. Random Forest pasó al paso de optimización.
+
+\begin{table}[H]\centering\small
+\caption{Selección de modelos: promedio de los cinco bloques de validación temporal, 2003 a 2021}\label{tab:seleccion}
+\begin{tabular}{lcccccc}
+\toprule
+Modelo & ROC AUC & Desv. & PR AUC & F1 & Exact. bal. & Brier \\
+\midrule
+\textbf{Random Forest} & \textbf{0,882} & 0,043 & 0,772 & \textbf{0,742} & \textbf{0,809} & \textbf{0,122} \\
+$k$ vecinos, $k=25$ & 0,879 & 0,036 & 0,760 & 0,714 & 0,791 & 0,125 \\
+Regresión logística & 0,875 & 0,041 & \textbf{0,778} & 0,679 & 0,780 & 0,162 \\
+HistGradientBoosting & 0,868 & 0,041 & 0,758 & 0,696 & 0,777 & 0,128 \\
+XGBoost & 0,867 & 0,037 & 0,759 & 0,711 & 0,785 & 0,126 \\
+LightGBM & 0,864 & 0,040 & 0,760 & 0,711 & 0,783 & 0,128 \\
+Árbol de decisión & 0,771 & 0,114 & 0,635 & 0,625 & 0,735 & 0,173 \\
+Línea base al azar & 0,507 & 0,016 & 0,316 & 0,312 & 0,507 & 0,427 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\fig{fig10_seleccion_modelos}{0.82}{\caption{ROC AUC de cada modelo en los cinco bloques de validación temporal.}\label{fig:seleccion}}
+
+\begin{lectura}
+El ROC AUC puede leerse así: si se toma al azar una emergencia grave y una leve, es la probabilidad de que el modelo
+asigne más riesgo a la grave. Un valor de 0,5 equivale a lanzar una moneda y 1 sería un acierto perfecto. Random
+Forest acierta en 88 de cada 100 comparaciones. Que varios modelos queden muy cerca indica que el resultado es
+sólido: la información del lugar, el mes y la historia del distrito sí anticipa la gravedad, sin depender de un
+algoritmo en particular.
+\end{lectura}
+
+% =============================================================================
+\section{Paso 4: optimización de hiperparámetros}\label{sec:opt}
+
+\subsection{Estrategias comparadas}
+
+De las cinco herramientas recomendadas en clase se ejecutaron tres, y se añadió la búsqueda aleatoria como punto de
+comparación, según la Tabla~\ref{tab:estrategias}. Las cuatro estrategias tuvieron el mismo presupuesto de 40
+evaluaciones, la misma métrica, que fue el ROC AUC promedio en los cinco bloques temporales, y el mismo espacio de
+búsqueda para Random Forest: número de árboles entre 100 y 300, profundidad máxima entre 3 y 30, mínimo de casos
+por hoja entre 1 y 50 en escala logarítmica y proporción de variables consideradas en cada división entre 0,1 y 1,0.
+
+\begin{table}[H]\centering\small
+\caption{Estrategias de optimización comparadas}\label{tab:estrategias}
+\begin{tabularx}{\textwidth}{L{3.3cm}L{3.6cm}Y}
+\toprule
+Estrategia & Librería & Cómo elige la siguiente configuración \\
+\midrule
+Búsqueda aleatoria & Optuna, muestreador aleatorio & Al azar; sirve de referencia \\
+TPE con poda & Optuna \citep{akiba2019} & Estima qué zonas del espacio dan buenos resultados y abandona a mitad de
+camino las pruebas que van peor que la mediana en los primeros bloques \\
+Proceso gaussiano & scikit-optimize & Optimización bayesiana clásica: ajusta un proceso gaussiano a los resultados
+y elige el punto con mayor mejora esperada \citep{shahriari2016} \\
+TPE clásico & Hyperopt \citep{bergstra2015} & Algoritmo TPE original, sin poda \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Ray Tune y BoTorch con Ax se revisaron, pero no se ejecutaron. Ray Tune está orientado a distribuir pruebas entre
+muchos procesadores o máquinas y, internamente, puede usar los mismos algoritmos de Optuna o Hyperopt; BoTorch
+requiere PyTorch y está pensado para espacios continuos con evaluaciones muy costosas \citep{bischl2023}. Con
+4\,715 filas y entrenamientos de pocos segundos no habrían modificado la comparación, y su instalación excedía la
+memoria y el espacio disponibles en el equipo.
+
+\subsection{Resultados}
+
+Las cuatro estrategias mejoraron el modelo por defecto, que pasó de 0,882 a alrededor de 0,891 de ROC AUC en
+validación, como muestran la Tabla~\ref{tab:opt} y la Figura~\ref{fig:conv}. Optuna obtuvo el mejor valor, en el
+menor tiempo y abandonando 5 pruebas gracias a la poda. scikit-optimize llegó casi al mismo valor en solo 15
+evaluaciones, lo que confirma que el proceso gaussiano aprende con rapidez cuando el espacio tiene pocas
+dimensiones. Hyperopt y la búsqueda aleatoria terminaron muy cerca. La diferencia entre estrategias, menor que
+0,001, es mucho más pequeña que la variación entre bloques, de manera que la elección del optimizador influyó poco
+en el resultado final y bastante en el costo: Optuna necesitó un 30\,\% menos de tiempo que la búsqueda aleatoria.
+
+\begin{table}[H]\centering\small
+\caption{Comparación de estrategias de optimización con 40 evaluaciones cada una}\label{tab:opt}
+\begin{tabular}{lcccc}
+\toprule
+Estrategia & Mejor ROC AUC & Evaluación en que lo alcanzó & Pruebas podadas & Tiempo en s \\
+\midrule
+Optuna, TPE con poda & \textbf{0,8911} & 31 & 5 & \textbf{236} \\
+scikit-optimize, proceso gaussiano & 0,8907 & \textbf{15} & 0 & 296 \\
+Hyperopt, TPE & 0,8906 & 23 & 0 & 366 \\
+Búsqueda aleatoria & 0,8904 & 30 & 0 & 338 \\
+\midrule
+Random Forest por defecto & 0,8816 & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\fig{fig11_convergencia_optimizadores}{1}{\caption{Mejor ROC AUC encontrado por cada estrategia según el número de
+evaluaciones, a la izquierda, y según el tiempo, a la derecha.}\label{fig:conv}}
+
+Los mejores hiperparámetros, encontrados por Optuna, fueron 158 árboles, profundidad máxima de 14, al menos 46
+casos por hoja y el 71\,\% de las variables en cada división. Las cuatro estrategias coincidieron en lo esencial:
+hojas grandes, de entre 31 y 50 casos, y entre el 59\,\% y el 86\,\% de las variables. Es decir, un bosque más
+regularizado que el de partida, que generaliza mejor hacia años no vistos. La importancia fANOVA de Optuna lo
+confirma: la proporción de variables explica el 75\,\% de la variación del resultado y el número de árboles solo
+el 8\,\%, como se aprecia en la Figura~\ref{fig:optuna}.
+
+\fig{fig12_optuna_historial_importancia}{1}{\caption{Historial de pruebas de Optuna, con las pruebas podadas, e
+importancia de cada hiperparámetro.}\label{fig:optuna}}
+
+\begin{lectura}
+Los hiperparámetros son los ajustes internos del modelo, como el número de árboles o su profundidad. Optimizarlos es
+similar a afinar un instrumento: el modelo mejoró de 0,882 a 0,891. Las cuatro estrategias llegaron prácticamente al
+mismo resultado, pero Optuna lo hizo en menos tiempo porque deja de probar a mitad de camino las configuraciones que
+no prometen. El mejor ajuste resultó ser un bosque prudente, con hojas grandes, que evita memorizar casos
+particulares y por eso funciona mejor con años nuevos.
+\end{lectura}
+
+\subsection{Evaluación final en el periodo de prueba}
+
+El modelo optimizado se reentrenó con los datos de 2003 a 2021 y se evaluó una sola vez con los de 2022 a 2026. El
+umbral de decisión se eligió con las predicciones fuera de muestra de la validación cruzada, como el valor que
+maximiza la F1, sin observar los datos de prueba. El modelo optimizado superó al de valores por defecto en todas las
+métricas, según la Tabla~\ref{tab:test}.
+
+\begin{table}[H]\centering\small
+\caption{Desempeño en el periodo de prueba, 2022 a 2026, con 1\,878 emergencias}\label{tab:test}
+\begin{tabular}{lcccccc}
+\toprule
+Modelo & Umbral & ROC AUC & PR AUC & F1 & Precisión & Sensibilidad \\
+\midrule
+Random Forest por defecto & 0,56 & 0,800 & 0,552 & 0,311 & 0,741 & 0,197 \\
+Random Forest optimizado & 0,68 & \textbf{0,821} & \textbf{0,586} & \textbf{0,434} & 0,724 & \textbf{0,310} \\
+Línea base al azar & & 0,500 & 0,216 & & 0,216 & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\fig{fig13_evaluacion_prueba}{1}{\caption{Curvas ROC y de precisión y sensibilidad en el periodo 2022 a 2026, y
+matriz de confusión del modelo optimizado.}\label{fig:test}}
+
+El desempeño en prueba es menor que en validación, 0,82 frente a 0,89, y con el umbral elegido el modelo solo
+detecta el 31\,\% de las emergencias graves, aunque acierta en el 72\,\% de las que señala, según la
+Figura~\ref{fig:test}. La explicación se encuentra en los datos: entre 2022 y 2026 la proporción de emergencias
+graves bajó al 21,6\,\%, frente al 31,2\,\% del entrenamiento, porque ahora se registran muchos más eventos
+pequeños. El umbral, fijado con la proporción anterior, quedó alto. El modelo ordena bien las emergencias según su
+riesgo, que es lo que mide el ROC AUC, pero el umbral debe recalibrarse con datos recientes antes de usarse. Por esa
+razón, la parte prescriptiva se apoya en el orden de riesgo y no en un umbral fijo.
+
+\begin{lectura}
+En años que el modelo nunca vio, sigue distinguiendo bien los casos graves de los leves, en 82 de cada 100
+comparaciones. Cuando señala una emergencia como grave, acierta siete de cada diez veces. Su punto débil es que deja
+pasar muchas emergencias graves si se usa un corte fijo, porque el registro reciente incluye más eventos pequeños
+que antes. La solución práctica no es descartar el modelo, sino usarlo para ordenar los reportes de mayor a menor
+riesgo, como se propone en la analítica prescriptiva.
+\end{lectura}
+
+% =============================================================================
+\section{Paso 5: \emph{reporting} con las cuatro analíticas}\label{sec:reporting}
+
+\subsection{Analítica descriptiva: qué pasó}
+
+La Figura~\ref{fig:tablero} reúne los indicadores principales y la Tabla~\ref{tab:kpi} los resume por periodos. En
+23 años y medio se registraron 6\,593 emergencias, con 2,76 millones de personas impactadas por evento, 116 mil
+damnificados, 177 fallecidos, 17\,382 viviendas destruidas sin contar 2026 y 778 mil camélidos perdidos. El periodo
+de 2010 a 2015 fue el más dañino: con menos emergencias registradas reunió casi un millón de personas por evento, el
+45\,\% de casos de alto impacto y 503 mil camélidos perdidos. El periodo de 2022 a 2026 tiene la mayor cantidad de
+emergencias registradas, 1\,878, pero con menos personas impactadas por emergencia.
+
+\begin{table}[H]\centering\small
+\caption{Indicadores descriptivos por periodo}\label{tab:kpi}
+\begin{tabular}{lrrrrrr}
+\toprule
+Periodo & Emergencias & Personas & Damnificados & Fallecidos & Camélidos & \% alto \\
+ & & por evento & & & perdidos & impacto \\
+\midrule
+2003 a 2009 & 2\,013 & 613\,750 & 50\,772 & 57 & 13\,167 & 30 \\
+2010 a 2015 & 1\,271 & 987\,615 & 50\,726 & 53 & 502\,765 & 45 \\
+2016 a 2021 & 1\,431 & 819\,762 & 7\,373 & 31 & 99\,261 & 20 \\
+2022 a 2026 & 1\,878 & 336\,415 & 7\,271 & 36 & 163\,087 & 22 \\
+\midrule
+Total & 6\,593 & 2\,757\,542 & 116\,142 & 177 & 778\,280 & 28 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\fig{fig14_tablero_descriptivo}{1}{\caption{Tablero descriptivo de las emergencias en la región Puno entre 2003 y 2026.}\label{fig:tablero}}
+
+\subsection{Analítica diagnóstica: por qué pasó}
+
+Las pruebas de asociación con la condición de alto impacto, presentadas en la Tabla~\ref{tab:diag}, muestran que el
+tipo de peligro es lo que más explica la gravedad de una emergencia, con una V de Cramér de 0,57 que indica una
+asociación fuerte, seguido del mes, con 0,37. La provincia y la región natural, por sí solas, pesan mucho menos.
+Las personas impactadas difieren de forma muy significativa entre peligros, según la prueba de Kruskal y Wallis,
+con $H=904$ y $p<0{,}001$. En cambio, el número anual de emergencias no muestra una tendencia significativa entre
+2003 y 2025, con $\rho=0{,}09$ de Spearman y $p=0{,}70$.
+
+\begin{table}[H]\centering\small
+\caption{Asociación entre cada variable y la condición de alto impacto mediante la prueba chi cuadrado}\label{tab:diag}
+\begin{tabular}{lrrcc}
+\toprule
+Variable & $\chi^2$ & gl & Valor p & V de Cramér \\
+\midrule
+Tipo de peligro & 2\,140,2 & 9 & $<0{,}001$ & 0,57 \\
+Mes & 907,2 & 11 & $<0{,}001$ & 0,37 \\
+Provincia & 106,0 & 12 & $<0{,}001$ & 0,13 \\
+Región natural & 16,8 & 1 & $<0{,}001$ & 0,05 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Sin embargo, el mismo peligro no afecta por igual a todas las provincias, como se observa en la
+Figura~\ref{fig:diag}. En Azángaro, el 80\,\% de las heladas registradas superó las 100 personas impactadas; en
+Lampa, el 75\,\%, y en Chucuito, el 73\,\%. En Moho la proporción baja al 48\,\% y en San Román, una provincia más
+urbana, al 54\,\%. La importancia por permutación del modelo final apunta en la misma dirección, según la
+Figura~\ref{fig:perm}: la variable más importante, con amplia diferencia, es la tasa histórica de alto impacto de ese
+mismo peligro en la provincia, cuya permutación reduce el ROC AUC en 0,15, seguida del tipo de peligro y del mes.
+
+\fig{fig15_diagnostico_tasa_alto}{1}{\caption{Proporción de emergencias de alto impacto por provincia y peligro,
+solo en las celdas con al menos 15 casos.}\label{fig:diag}}
+
+\fig{fig16_importancia_permutacion}{0.78}{\caption{Importancia por permutación de las variables del modelo final,
+medida en el periodo de prueba.}\label{fig:perm}}
+
+\begin{lectura}
+La gravedad de una emergencia depende sobre todo de qué peligro es y de en qué mes ocurre. Pero hay algo más: cada
+provincia tiene su propia vulnerabilidad. Una helada en Azángaro termina siendo grave ocho de cada diez veces,
+mientras que en Moho lo es la mitad de las veces. La mejor pista de lo que puede pasar es lo que ya pasó en ese mismo
+lugar con ese mismo peligro, y eso es justamente lo que el modelo aprendió a usar.
+\end{lectura}
+
+\subsection{Analítica predictiva: qué puede pasar}
+
+Además de clasificar cada emergencia, el modelo se utilizó para construir una matriz de riesgo por provincia y mes.
+Para cada celda, el número esperado de emergencias de alto impacto en un año se calcula como
+
+\begin{equation}
+\widehat{A}_{p,m} = \overline{E}_{p,m} \times \overline{P}_{p,m},
+\end{equation}
+
+\noindent donde $\overline{E}_{p,m}$ es el promedio de emergencias de la provincia $p$ en el mes $m$ entre 2021 y
+2025, y $\overline{P}_{p,m}$ es la probabilidad media de alto impacto que el modelo asigna a esas emergencias,
+suavizada hacia el promedio de la provincia. En un año típico se esperan unas 76 emergencias graves en la región,
+como muestra la Figura~\ref{fig:riesgo}. Melgar, con 12,5; Azángaro, con 11,1, y Puno, con 10,6, son las provincias
+con más casos esperados, seguidas de Sandia, con 8,6; Moho y Yunguyo esperan alrededor de uno al año. El riesgo
+cambia de lugar según la temporada: en lluvias encabezan Melgar, Azángaro y Sandia, y la celda más crítica del año es
+Azángaro en marzo; en heladas encabezan Puno, Melgar y Azángaro, con picos en junio y julio.
+
+\fig{fig17_matriz_riesgo}{1}{\caption{Matriz de riesgo: emergencias de alto impacto esperadas por provincia y mes en
+un año típico.}\label{fig:riesgo}}
+
+\begin{lectura}
+Cada número de la matriz indica cuántas emergencias graves se esperan en esa provincia y ese mes en un año normal.
+Las celdas más oscuras señalan dónde y cuándo debe estar lista la respuesta. Por ejemplo, Azángaro en marzo espera
+2,6 emergencias graves, la cifra más alta del año, y Puno en junio y julio espera casi dos cada mes. Con esta matriz
+se puede planificar con anticipación en lugar de reaccionar cuando la emergencia ya ocurrió.
+\end{lectura}
+
+\subsection{Analítica prescriptiva: qué conviene hacer}
+
+La analítica prescriptiva recomienda acciones y no se limita a anticipar lo que puede ocurrir \citep{lepenioti2020}.
+Se proponen dos decisiones.
+
+\paragraph{Decisión A. Priorizar la evaluación de daños.} Los equipos que realizan la evaluación de daños son
+escasos. Si cada día se ordenan los reportes según la probabilidad del modelo y se evalúan primero los de mayor
+riesgo, la cobertura de las emergencias graves mejora de forma notable respecto de atender por orden de llegada,
+como se observa en la Figura~\ref{fig:ganancia}. En el periodo de prueba, evaluar primero el 10\,\% de los reportes
+con mayor riesgo cubre el 33\,\% de los casos graves; el 20\,\%, el 54\,\%; el 30\,\%, el 66\,\%, y la mitad, el
+84\,\%. Por orden de llegada, esos porcentajes serían iguales a la capacidad. La regla no depende del umbral, por lo
+que no la afecta el cambio en la proporción de casos graves.
+
+\fig{fig18_curva_ganancia_priorizacion}{0.7}{\caption{Curva de ganancia en el periodo 2022 a 2026: proporción de
+emergencias graves cubiertas según la capacidad de evaluación, priorizando con el modelo y por orden de
+llegada.}\label{fig:ganancia}}
+
+\begin{lectura}
+Si el personal solo alcanza para evaluar primero uno de cada cinco reportes, y se eligen los que el modelo considera
+más riesgosos, se atiende a más de la mitad de las emergencias graves. Atendiendo por orden de llegada se cubriría
+solo una de cada cinco. Con el mismo personal, el modelo permite llegar antes a quienes más lo necesitan.
+\end{lectura}
+
+\paragraph{Decisión B. Pre posicionar kits de ayuda humanitaria.} Antes de cada temporada debe decidirse cuántos kits
+de abrigo, techo y alimentos dejar en cada provincia. Se formuló un modelo de programación lineal resuelto con
+PuLP. La demanda esperada de la provincia $p$ en la temporada, $d_p$, es el número de emergencias graves esperadas
+según la matriz de riesgo, multiplicado por la mediana de personas impactadas en las emergencias graves de esa
+provincia entre 2016 y 2025 y dividido entre cuatro personas por kit. El peso $w_p$, igual a uno más la proporción de
+damnificados entre las personas impactadas de la provincia, otorga más prioridad a donde más personas pierden su
+vivienda, y $c_p$ es la distancia aproximada por carretera desde un almacén central supuesto en Juliaca. Para
+representar rendimientos decrecientes, la asignación de cada provincia se divide en tres tramos de un tercio de su
+demanda, $x_p=y_{p1}+y_{p2}+y_{p3}$: el primer tercio cubre las necesidades más urgentes y vale el triple, el
+segundo vale el doble y el tercero vale lo normal, es decir, $v=3,2,1$. Con un stock $S$, el modelo es
+
+\begin{equation}
+\min \sum_{p}\sum_{k=1}^{3} w_p\,v_k\left(\frac{d_p}{3}-y_{pk}\right) + 0{,}001\sum_p c_p\,x_p
+\quad\text{sujeto a}\quad \sum_p x_p \le S,\qquad 0\le y_{pk}\le \frac{d_p}{3}.
+\end{equation}
+
+\noindent El primer término representa la necesidad no cubierta, ponderada; el segundo solo desempata a favor de
+las provincias más cercanas. El modelo se resolvió para las dos temporadas y para tres niveles de stock, equivalentes
+al 50, 75 y 100\,\% de la demanda. La demanda esperada asciende a 4\,887 kits en lluvias y 6\,302 en heladas, de
+modo que las heladas exigen un 29\,\% más de abastecimiento.
+
+\begin{table}[H]\centering\small
+\caption{Kits asignados por provincia con un stock equivalente al 75\,\% de la demanda esperada}\label{tab:kits}
+\begin{tabular}{lrrrrrr}
+\toprule
+ & \multicolumn{3}{c}{Lluvias, diciembre a marzo} & \multicolumn{3}{c}{Heladas, mayo a setiembre} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Provincia & Demanda & Asignado & Cobertura & Demanda & Asignado & Cobertura \\
+\midrule
+Azángaro & 642 & 580 & 90\,\% & 600 & 600 & 100\,\% \\
+Carabaya & 631 & 421 & 67\,\% & 1\,047 & 698 & 67\,\% \\
+Chucuito & 298 & 199 & 67\,\% & 440 & 293 & 67\,\% \\
+El Collao & 389 & 259 & 67\,\% & 337 & 225 & 67\,\% \\
+Huancané & 319 & 213 & 67\,\% & 966 & 644 & 67\,\% \\
+Lampa & 535 & 535 & 100\,\% & 631 & 631 & 100\,\% \\
+Melgar & 914 & 609 & 67\,\% & 770 & 513 & 67\,\% \\
+Moho & 22 & 15 & 67\,\% & 27 & 18 & 67\,\% \\
+Puno & 521 & 347 & 67\,\% & 902 & 625 & 69\,\% \\
+San Antonio de Putina & 92 & 61 & 67\,\% & 158 & 105 & 67\,\% \\
+San Román & 230 & 230 & 100\,\% & 271 & 271 & 100\,\% \\
+Sandia & 240 & 160 & 67\,\% & 147 & 98 & 67\,\% \\
+Yunguyo & 54 & 36 & 67\,\% & 6 & 4 & 67\,\% \\
+\midrule
+Total & 4\,887 & 3\,665 & 75\,\% & 6\,302 & 4\,726 & 75\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Con un stock del 75\,\%, todas las provincias quedan cubiertas al menos en dos tercios y solo queda sin cubrir un
+13\,\% de la necesidad ponderada, según la Tabla~\ref{tab:kits} y la Figura~\ref{fig:kits}. El último tercio se
+completa primero en San Román, Lampa y Azángaro. Como los pesos de vulnerabilidad de las provincias son muy
+parecidos, entre 1,02 y 1,12, en ese tramo decide la distancia, y esas son las provincias más cercanas al almacén de
+Juliaca. Con un stock del 50\,\%, la necesidad no cubierta sube al 33\,\%. El precio sombra de la restricción de
+stock es cercano a 2 cuando el stock es del 50\,\% y a 1 cuando es del 75\,\%, lo que significa que cada kit
+adicional rinde el doble cuando el stock es escaso. La curva de sensibilidad de la Figura~\ref{fig:sens} muestra que
+pasar del 50 al 75\,\% del stock reduce la necesidad no cubierta de 33 a 13\,\%, mientras que completar el 100\,\%
+exige la misma cantidad de kits y rinde menos.
+
+\fig{fig19_plan_kits}{1}{\caption{Asignación de kits y cobertura por provincia en las dos temporadas con un stock
+equivalente al 75\,\% de la demanda esperada.}\label{fig:kits}}
+
+\fig{fig20_sensibilidad_stock}{0.68}{\caption{Necesidad ponderada no cubierta según el stock disponible.}\label{fig:sens}}
+
+\begin{lectura}
+El modelo funciona como un reparto inteligente. Primero asegura a cada provincia dos tercios de lo que
+probablemente necesitará y solo después completa a las que están más cerca del almacén. Con tres cuartas partes de
+los kits se cubre el 87\,\% de la necesidad; conseguir el último cuarto cuesta lo mismo, pero aporta menos. El
+precio sombra resume esta idea: cuando hay pocos kits, cada kit adicional vale el doble.
+\end{lectura}
+
+La recomendación que se desprende es pre posicionar al menos el 75\,\% de la demanda esperada antes de noviembre
+para la temporada de lluvias, con prioridad en Melgar, Azángaro, Carabaya y Lampa, y antes de abril para la de
+heladas, con prioridad en Carabaya, Huancané, Puno y Melgar.
+
+% =============================================================================
+\section{Tablero interactivo de inteligencia de negocios}\label{sec:tablero}
+
+Para que los resultados puedan consultarse y explorarse sin leer el código, se desarrolló un tablero interactivo
+en R con Shiny, publicado en \url{https://mlnp.shinyapps.io/emergencias-puno/}. El tablero conserva la identidad
+visual del módulo elaborado en la semana 2 y organiza la información según las cuatro analíticas, de modo que el
+usuario recorre las preguntas en el mismo orden que este informe. La Tabla~\ref{tab:pestanas} describe sus
+pestañas.
+
+\begin{table}[H]\centering\small
+\caption{Pestañas del tablero interactivo y analítica a la que corresponden}\label{tab:pestanas}
+\begin{tabularx}{\textwidth}{L{2.4cm}L{2.6cm}Y}
+\toprule
+Pestaña & Analítica & Contenido \\
+\midrule
+Resumen & Descriptiva & Indicadores clave, emergencias por año, frecuencia frente a impacto por peligro,
+estacionalidad y distritos más afectados \\
+Mapa & Descriptiva & Mapa distrital con cuatro métricas a elegir y detalle del distrito al hacer clic \\
+Diagnóstico & Diagnóstica & Probabilidad de alto impacto por peligro y provincia, V de Cramér y calidad del registro \\
+Modelo & Predictiva & Comparación de modelos, optimización de hiperparámetros, curva ROC, matriz de confusión e
+importancia de variables \\
+Predicción & Predictiva & Matriz de riesgo por provincia y mes, filtrable por temporada \\
+Prescripción & Prescriptiva & Curva de priorización con capacidad ajustable y reparto de kits con stock ajustable \\
+Datos & Todas & Tabla de emergencias filtradas con descarga en CSV \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+El tablero incorpora tres decisiones de diseño orientadas a que cualquier persona pueda interpretarlo. En primer
+lugar, cada gráfico incluye debajo una explicación en lenguaje sencillo, que se recalcula cuando cambian los
+filtros. En segundo lugar, los indicadores clave muestran, al pasar el cursor, qué significa la cifra y cómo debe
+leerse. En tercer lugar, la pestaña de prescripción permite mover la capacidad de evaluación y el stock de kits para
+observar cómo cambia la recomendación, lo que convierte el modelo de optimización en una herramienta de simulación
+para el decisor. Para ello, la solución de PuLP se precalculó para niveles de stock entre el 30 y el 120\,\% de la
+demanda, en pasos de cinco puntos. Las Figuras~\ref{fig:t1} a \ref{fig:t3} muestran tres de sus pestañas.
+
+\fig{t_resumen}{1}{\caption{Pestaña Resumen del tablero, con los indicadores clave y la explicación sencilla bajo
+cada gráfico.}\label{fig:t1}}
+
+\fig{t_prediccion}{1}{\caption{Pestaña Predicción del tablero, con la matriz de riesgo por provincia y mes.}\label{fig:t2}}
+
+\fig{t_prescripcion}{1}{\caption{Pestaña Prescripción del tablero, con los controles de capacidad y de stock.}\label{fig:t3}}
+
+% =============================================================================
+\section{Discusión y limitaciones}
+
+El trabajo muestra que la calidad del registro condiciona cada nivel de la analítica. Sin revisar los datos se habría
+concluido que 2019 fue un año tranquilo, que la ayuda humanitaria desapareció desde 2024 o que en el primer semestre
+de 2026 se destruyeron más viviendas que en los 23 años anteriores. Las tres conclusiones habrían sido falsas, ya
+que corresponden a problemas de registro. Este hallazgo coincide con lo que señalan \citet{sun2020} y
+\citet{kyrkou2023}: en la gestión de emergencias, la principal limitación de la analítica no es el algoritmo, sino
+los datos con que se alimenta.
+
+En el modelado, la ganancia de la optimización fue modesta en validación, alrededor de 0,01 de ROC AUC, pero se
+mantuvo en el periodo de prueba, donde alcanzó 0,02. Que las cuatro estrategias convergieran a valores casi iguales
+indica que, con un espacio de cuatro hiperparámetros y presupuestos de 40 evaluaciones, la diferencia entre Optuna,
+scikit-optimize e Hyperopt reside más en la eficiencia que en el resultado. Este comportamiento es consistente con
+lo que describen \citet{bischl2023}: la ventaja de los métodos bayesianos y de la poda crece con la dimensión del
+espacio y con el costo de cada evaluación.
+
+En la parte prescriptiva, el aporte principal es conectar la predicción con la decisión. Tal como advierte la revisión de
+\citet{sabbaghtorkan2020}, la mayoría de modelos de pre posicionamiento parten de escenarios de demanda supuestos;
+aquí la demanda proviene de la matriz de riesgo estimada con datos, lo que vuelve la recomendación verificable y
+actualizable cada año.
+
+El trabajo tiene varias limitaciones. El umbral de 100 personas es una definición operativa elegida y no una norma
+oficial. El modelo pierde desempeño en los años recientes porque cambió la proporción de casos graves, por lo que su
+umbral de clasificación debe recalibrarse. Las personas impactadas son personas por evento y no personas distintas.
+En el modelo prescriptivo, las distancias, el tamaño del kit y los pesos son supuestos razonables pero simplificados;
+un uso real requeriría los costos de transporte, la capacidad de los almacenes y el inventario del INDECI. Por
+último, el modelo no incorpora variables climáticas, como la temperatura mínima o la precipitación, que podrían
+mejorar la anticipación.
+
+% =============================================================================
+\section{Conclusiones}
+
+\begin{enumerate}
+\item \textbf{Conjunto de datos.} El registro del SINPAD es una fuente local, abierta y rica para la inteligencia de
+negocios en la gestión del riesgo de Puno, aunque presenta problemas de registro, como el subregistro de 2014 y
+2019, la pérdida del registro de la ayuda y el error en las viviendas destruidas de 2026, que deben corregirse o
+declararse antes de analizar.
+\item \textbf{Análisis exploratorio.} Las heladas constituyen el problema central de la región: el 29\,\% de las
+emergencias, pero el 77\,\% de las personas impactadas y el 76\,\% de los camélidos perdidos. El riesgo se concentra
+en dos temporadas, de diciembre a marzo y de mayo a agosto, y en pocos distritos.
+\item \textbf{Selección de modelos.} Con la información disponible al momento del reporte, un Random Forest anticipa si
+una emergencia será de alto impacto con un ROC AUC de 0,882 en validación temporal.
+\item \textbf{Optimización.} Optuna, scikit-optimize e Hyperopt mejoraron el modelo de manera similar, de 0,882 a 0,891 en
+validación y de 0,800 a 0,821 en prueba. Optuna fue la estrategia más eficiente gracias a la poda y scikit-optimize
+la que convergió en menos evaluaciones.
+\item \textbf{\emph{Reporting}.} La analítica descriptiva identificó qué ocurrió y cuándo; la diagnóstica mostró que el
+tipo de peligro y la vulnerabilidad histórica de cada provincia explican la gravedad; la predictiva estimó unas 76
+emergencias graves por año, con Melgar, Azángaro y Puno a la cabeza, y la prescriptiva propuso dos decisiones
+concretas. El tablero interactivo pone estos resultados al alcance de cualquier usuario.
+\end{enumerate}
+
+% =============================================================================
+\section{Recomendaciones}
+
+\begin{enumerate}
+\item Fortalecer el llenado del SINPAD por parte de los gobiernos locales, en especial la evaluación de daños y el
+registro de la ayuda entregada, ya que su ausencia impide medir la eficacia de la respuesta.
+\item Incorporar el orden de riesgo del modelo en la programación diaria de los equipos de evaluación, empezando por las
+provincias de Melgar, Azángaro y Puno.
+\item Pre posicionar al menos el 75\,\% de los kits estimados antes de noviembre para la temporada de lluvias y antes de
+abril para la de heladas.
+\item Recalibrar el umbral del modelo cada año con las emergencias más recientes y actualizar la matriz de riesgo y el
+plan de kits con el mismo cuaderno, que ya está programado para ello.
+\item En trabajos futuros, integrar datos climáticos del SENAMHI y los costos logísticos reales del INDECI para mejorar
+tanto la predicción como la optimización.
+\end{enumerate}
+
+% =============================================================================
+\section*{Referencias}
+% APA 7. Todas las referencias con DOI se verificaron en Crossref el 14/11/2026.
+\renewcommand{\refname}{}
+\setlength{\bibsep}{6pt}
+\setlength{\bibhang}{1.27cm}
+\vspace{-1.2cm}
+\begin{thebibliography}{99}\small
+\bibitem[Akiba et~al.(2019)]{akiba2019}
+Akiba, T., Sano, S., Yanase, T., Ohta, T. y Koyama, M. (2019). Optuna: A next-generation hyperparameter
+optimization framework. En \emph{Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery
+\& Data Mining} (pp. 2623--2631). ACM. \url{https://doi.org/10.1145/3292500.3330701}
+
+\bibitem[Balcik y Beamon(2008)]{balcik2008}
+Balcik, B. y Beamon, B. M. (2008). Facility location in humanitarian relief. \emph{International Journal of
+Logistics Research and Applications, 11}(2), 101--121. \url{https://doi.org/10.1080/13675560701561789}
+
+\bibitem[Bergmeir y Benítez(2012)]{bergmeir2012}
+Bergmeir, C. y Benítez, J. M. (2012). On the use of cross-validation for time series predictor evaluation.
+\emph{Information Sciences, 191}, 192--213. \url{https://doi.org/10.1016/j.ins.2011.12.028}
+
+\bibitem[Bergstra et~al.(2015)]{bergstra2015}
+Bergstra, J., Komer, B., Eliasmith, C., Yamins, D. y Cox, D. D. (2015). Hyperopt: A Python library for model
+selection and hyperparameter optimization. \emph{Computational Science \& Discovery, 8}(1), Artículo 014008.
+\url{https://doi.org/10.1088/1749-4699/8/1/014008}
+
+\bibitem[Bischl et~al.(2023)]{bischl2023}
+Bischl, B., Binder, M., Lang, M., Pielok, T., Richter, J., Coors, S., Thomas, J., Ullmann, T., Becker, M.,
+Boulesteix, A.-L., Deng, D. y Lindauer, M. (2023). Hyperparameter optimization: Foundations, algorithms, best
+practices, and open challenges. \emph{WIREs Data Mining and Knowledge Discovery, 13}(2), Artículo e1484.
+\url{https://doi.org/10.1002/widm.1484}
+
+\bibitem[Breiman(2001)]{breiman2001}
+Breiman, L. (2001). Random forests. \emph{Machine Learning, 45}(1), 5--32.
+\url{https://doi.org/10.1023/A:1010933404324}
+
+\bibitem[Cerqueira et~al.(2020)]{cerqueira2020}
+Cerqueira, V., Torgo, L. y Mozetič, I. (2020). Evaluating time series forecasting models: An empirical study on
+performance estimation methods. \emph{Machine Learning, 109}(11), 1997--2028.
+\url{https://doi.org/10.1007/s10994-020-05910-7}
+
+\bibitem[Chen y Guestrin(2016)]{chen2016}
+Chen, T. y Guestrin, C. (2016). XGBoost: A scalable tree boosting system. En \emph{Proceedings of the 22nd ACM SIGKDD
+International Conference on Knowledge Discovery and Data Mining} (pp. 785--794). ACM.
+\url{https://doi.org/10.1145/2939672.2939785}
+
+\bibitem[Delen y Ram(2018)]{delen2018}
+Delen, D. y Ram, S. (2018). Research challenges and opportunities in business analytics. \emph{Journal of
+Business Analytics, 1}(1), 2--12. \url{https://doi.org/10.1080/2573234X.2018.1507324}
+
+\bibitem[Ghaffarian et~al.(2023)]{ghaffarian2023}
+Ghaffarian, S., Taghikhah, F. R. y Maier, H. R. (2023). Explainable artificial intelligence in disaster risk
+management: Achievements and prospective futures. \emph{International Journal of Disaster Risk Reduction, 98},
+Artículo 104123. \url{https://doi.org/10.1016/j.ijdrr.2023.104123}
+
+\bibitem[Kaufman et~al.(2012)]{kaufman2012}
+Kaufman, S., Rosset, S., Perlich, C. y Stitelman, O. (2012). Leakage in data mining: Formulation, detection, and
+avoidance. \emph{ACM Transactions on Knowledge Discovery from Data, 6}(4), 1--21.
+\url{https://doi.org/10.1145/2382577.2382579}
+
+\bibitem[Ke et~al.(2017)]{ke2017}
+Ke, G., Meng, Q., Finley, T., Wang, T., Chen, W., Ma, W., Ye, Q. y Liu, T.-Y. (2017). LightGBM: A highly efficient
+gradient boosting decision tree. En \emph{Advances in Neural Information Processing Systems, 30} (pp. 3146--3154).
+
+\bibitem[Kyrkou et~al.(2023)]{kyrkou2023}
+Kyrkou, C., Kolios, P., Theocharides, T. y Polycarpou, M. (2023). Machine learning for emergency management: A
+survey and future outlook. \emph{Proceedings of the IEEE, 111}(1), 19--41.
+\url{https://doi.org/10.1109/JPROC.2022.3223186}
+
+\bibitem[Lepenioti et~al.(2020)]{lepenioti2020}
+Lepenioti, K., Bousdekis, A., Apostolou, D. y Mentzas, G. (2020). Prescriptive analytics: Literature review and
+research challenges. \emph{International Journal of Information Management, 50}, 57--70.
+\url{https://doi.org/10.1016/j.ijinfomgt.2019.04.003}
+
+\bibitem[Linardos et~al.(2022)]{linardos2022}
+Linardos, V., Drakaki, M., Tzionas, P. y Karnavas, Y. L. (2022). Machine learning in disaster management: Recent
+developments in methods and applications. \emph{Machine Learning and Knowledge Extraction, 4}(2), 446--473.
+\url{https://doi.org/10.3390/make4020020}
+
+\bibitem[Pedregosa et~al.(2011)]{pedregosa2011}
+Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., Blondel, M., Prettenhofer, P.,
+Weiss, R., Dubourg, V., Vanderplas, J., Passos, A., Cournapeau, D., Brucher, M., Perrot, M. y Duchesnay, É.
+(2011). Scikit-learn: Machine learning in Python. \emph{Journal of Machine Learning Research, 12}, 2825--2830.
+
+\bibitem[Rawls y Turnquist(2010)]{rawls2010}
+Rawls, C. G. y Turnquist, M. A. (2010). Pre-positioning of emergency supplies for disaster response.
+\emph{Transportation Research Part B: Methodological, 44}(4), 521--534. \url{https://doi.org/10.1016/j.trb.2009.08.003}
+
+\bibitem[Sabbaghtorkan et~al.(2020)]{sabbaghtorkan2020}
+Sabbaghtorkan, M., Batta, R. y He, Q. (2020). Prepositioning of assets and supplies in disaster operations
+management: Review and research gap identification. \emph{European Journal of Operational Research, 284}(1), 1--19.
+\url{https://doi.org/10.1016/j.ejor.2019.06.029}
+
+\bibitem[Saito y Rehmsmeier(2015)]{saito2015}
+Saito, T. y Rehmsmeier, M. (2015). The precision-recall plot is more informative than the ROC plot when evaluating
+binary classifiers on imbalanced datasets. \emph{PLOS ONE, 10}(3), Artículo e0118432.
+\url{https://doi.org/10.1371/journal.pone.0118432}
+
+\bibitem[Shahriari et~al.(2016)]{shahriari2016}
+Shahriari, B., Swersky, K., Wang, Z., Adams, R. P. y de Freitas, N. (2016). Taking the human out of the loop: A
+review of Bayesian optimization. \emph{Proceedings of the IEEE, 104}(1), 148--175.
+\url{https://doi.org/10.1109/JPROC.2015.2494218}
+
+\bibitem[Sun et~al.(2020)]{sun2020}
+Sun, W., Bocchini, P. y Davison, B. D. (2020). Applications of artificial intelligence for disaster management.
+\emph{Natural Hazards, 103}(3), 2631--2689. \url{https://doi.org/10.1007/s11069-020-04124-3}
+\end{thebibliography}
+
+\section*{Fuente de datos}
+\renewcommand{\refname}{}
+\vspace{-1.2cm}
+\begin{thebibliography}{99}\small
+\bibitem[INDECI(2026)]{indeci2026}
+Instituto Nacional de Defensa Civil. (2026). \emph{Emergencias y daños a nivel nacional por departamento}
+[Conjunto de datos: BD\_2003-2025\_EMERGENCIAS.csv, BD\_2026\_Semestre\_I.csv y diccionario de datos]. Plataforma
+Nacional de Datos Abiertos. Licencia ODC BY. Última modificación: 30 de octubre de 2026. Consultado el 9 de
+noviembre de 2026. \url{https://www.datosabiertos.gob.pe/dataset/emergencias-y-da\%C3\%B1os-nivel-nacional-por-departamento}
+\end{thebibliography}
+
+% =============================================================================
+\section*{Anexo A. Glosario de términos}
+\addcontentsline{toc}{section}{Anexo A. Glosario de términos}
+
+\begin{table}[H]\centering\small
+\begin{tabularx}{\textwidth}{L{3.6cm}Y}
+\toprule
+Término & Significado \\
+\midrule
+Emergencia de alto impacto & Emergencia con 100 o más personas impactadas. Es la condición que el modelo aprende a anticipar. \\
+Personas impactadas & Suma de fallecidos, desaparecidos, lesionados, damnificados y afectados de una emergencia. \\
+Validación cruzada temporal & Forma de evaluar un modelo en la que siempre se entrena con el pasado y se prueba con el
+periodo siguiente, como ocurriría en la realidad. \\
+Fuga de información & Error que consiste en usar para predecir un dato que todavía no se conoce en el momento de la
+decisión, lo que hace que el modelo parezca mejor de lo que es. \\
+ROC AUC & Probabilidad de que el modelo asigne más riesgo a una emergencia grave que a una leve tomadas al azar.
+Vale 0,5 para el azar y 1 para un modelo perfecto. \\
+PR AUC & Resume la relación entre la precisión y la sensibilidad. Es más exigente cuando los casos graves son minoría. \\
+Precisión & De las emergencias que el modelo señala como graves, proporción que realmente lo fue. \\
+Sensibilidad & De las emergencias realmente graves, proporción que el modelo logró detectar. \\
+F1 & Promedio armónico de la precisión y la sensibilidad; equilibra ambos aciertos. \\
+Puntaje de Brier & Error cuadrático medio de las probabilidades. Cuanto más bajo, mejor calibradas están. \\
+Hiperparámetro & Ajuste del modelo que se fija antes de entrenarlo, como el número de árboles o su profundidad. \\
+Poda & Técnica de Optuna que abandona una configuración a mitad de su evaluación cuando sus primeros resultados son
+peores que la mediana de las anteriores. \\
+V de Cramér & Medida de la fuerza de asociación entre dos variables categóricas, entre 0 y 1. \\
+Importancia por permutación & Caída del desempeño del modelo cuando se desordenan los valores de una variable;
+cuanto mayor es la caída, más importante es la variable. \\
+Curva de ganancia & Proporción de casos graves cubiertos según la proporción de reportes atendidos en orden de riesgo. \\
+Precio sombra & Mejora del objetivo de un modelo de optimización por cada unidad adicional de un recurso limitado,
+en este caso, por cada kit adicional. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% =============================================================================
+\section*{Anexo B. Archivos entregados y enlaces}
+
+\begin{itemize}
+\item \textbf{Tablero interactivo:} \url{https://mlnp.shinyapps.io/emergencias-puno/}
+\item \textbf{Repositorio público:} \url{https://github.com/mlnp-dev/emergencias-puno-indeci}
+\item \texttt{Semana4\_INDECI\_Puno.ipynb}: cuaderno con los cinco pasos, ejecutado, con el código, las salidas y la
+interpretación de cada resultado, junto con su versión en HTML.
+\item \texttt{datos/}: archivos originales del INDECI y la base limpia de Puno.
+\item \texttt{figuras/}: las 20 figuras del análisis en formato PNG.
+\item \texttt{resultados/}: tablas en CSV de calidad, selección de modelos, comparación de optimizadores, evaluación de
+prueba, matriz de riesgo y plan de kits, además de los mejores hiperparámetros en JSON.
+\item \texttt{shiny/}: código y datos del tablero interactivo; \texttt{capturas/}: imágenes de cada pestaña.
+\end{itemize}
+
+\end{document}

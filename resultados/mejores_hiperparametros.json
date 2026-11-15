@@ -1,0 +1,10 @@
+{
+  "familia": "Random Forest",
+  "estrategia": "Optuna TPE + poda",
+  "params": {
+    "n_estimators": 158,
+    "max_depth": 14,
+    "min_samples_leaf": 46,
+    "max_features": 0.7077375877582757
+  }
+}

@@ -1,0 +1,16 @@
+# Copia de la versión entregada el 9/11 (se conserva solo en local)
+informe/version_entregada_09nov/
+# Duplicado del PDF que está en la raíz
+informe/informe.pdf
+# Datos de la cuenta de despliegue en shinyapps.io
+shiny/rsconnect/
+# Temporales
+.ipynb_checkpoints/
+__pycache__/
+.Rhistory
+.RData
+.Rproj.user/
+*.aux
+*.log
+*.out
+*.toc
